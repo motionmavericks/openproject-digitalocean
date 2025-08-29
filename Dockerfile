@@ -1,22 +1,26 @@
 FROM openproject/community:14
 
-# Set environment variables
+# Set environment for production
+ENV RAILS_ENV=production
 ENV OPENPROJECT_HTTPS=true
-ENV OPENPROJECT_HOST__NAME=openproject.example.com
 ENV OPENPROJECT_HSTS=true
-ENV DATABASE_URL=postgres://openproject:${OPENPROJECT_DB_PASSWORD}@${OPENPROJECT_DB_HOST}:${OPENPROJECT_DB_PORT}/${OPENPROJECT_DB_NAME}?pool=20&reconnect=true
-ENV SECRET_KEY_BASE=${SECRET_KEY_BASE}
-ENV OPENPROJECT_CACHE__STORE=redis
-ENV OPENPROJECT_CACHE__REDIS__URL=redis://:${REDIS_PASSWORD}@${REDIS_HOST}:6379/0
-ENV OPENPROJECT_JOB__STORE=redis
-ENV OPENPROJECT_JOB__REDIS__URL=redis://:${REDIS_PASSWORD}@${REDIS_HOST}:6379/1
 
-# App Platform expects port 8080
+# Configure for DigitalOcean App Platform
 ENV PORT=8080
+ENV OPENPROJECT_CLI_PROXY_HTTPS=true
+
+# Set worker processes for 4GB RAM configuration
+ENV RAILS_MIN_THREADS=4
+ENV RAILS_MAX_THREADS=16
+ENV WEB_WORKERS=2
+ENV WORKER_PROCESSES=1
+
+# Configure logging for App Platform
+ENV OPENPROJECT_RAILS__STDOUT__LOGGING=true
+ENV OPENPROJECT_RAILS__LOG__LEVEL=info
+
+# Disable browser validation to avoid issues with reverse proxy
+ENV OPENPROJECT_BROWSER__VALIDATIONS=false
+
+# Expose port for App Platform
 EXPOSE 8080
-
-# Use the openproject user
-USER 1001
-
-# Start OpenProject
-CMD ["./docker/prod/entrypoint.sh", "./docker/prod/web"]
